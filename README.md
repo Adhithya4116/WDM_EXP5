@@ -1,5 +1,5 @@
 ### EX5 Information Retrieval Using Boolean Model in Python
-### DATE: 
+### DATE: 25.09.25
 ### AIM: To implement Information Retrieval Using Boolean Model in Python.
 ### Description:
 <div align = "justify">
@@ -22,72 +22,105 @@ The Boolean model in Information Retrieval (IR) is a fundamental model used for 
     <p>c) For each term in the query, it retrieves documents containing that term and performs Boolean operations (AND, OR, NOT) based on the query's structure.
 
 ### Program:
+```
+import numpy as np
+import pandas as pd
 
-    import numpy as np
-    import pandas as pd
-    class BooleanRetrieval:
-        def __init__(self):
-            self.index = {}
-            self.documents_matrix = None
+class BooleanRetrieval:
+    def __init__(self):
+        self.documents = {}
+        self.index = {}
+        self.documents_matrix = None
 
     def index_document(self, doc_id, text):
+        self.documents[doc_id] = text
         terms = text.lower().split()
-        print("Document -", doc_id, terms)
+        print(f"Document {doc_id}:", terms)
 
         for term in terms:
             if term not in self.index:
                 self.index[term] = set()
             self.index[term].add(doc_id)
 
-    def create_documents_matrix(self, documents):
+    def create_documents_matrix(self):  # Added this function as a method within the class
         terms = list(self.index.keys())
-        num_docs = len(documents)
+        num_docs = len(self.documents)
         num_terms = len(terms)
-
         self.documents_matrix = np.zeros((num_docs, num_terms), dtype=int)
 
-        for i, (doc_id, text) in enumerate(documents.items()):
+        for i, (doc_id, text) in enumerate(self.documents.items()):
             doc_terms = text.lower().split()
             for term in doc_terms:
                 if term in self.index:
                     term_id = terms.index(term)
                     self.documents_matrix[i, term_id] = 1
 
-    def print_documents_matrix_table(self):
-        df = pd.DataFrame(self.documents_matrix, columns=self.index.keys())
+    def print_documents_matrix_table(self):  # Added this function as a method within the class
+        df = pd.DataFrame(
+            self.documents_matrix,
+            columns=list(self.index.keys()),
+            index=self.documents.keys()
+        )
+        print("\nDocument-Term Matrix:")
         print(df)
 
-    def print_all_terms(self):
-        print("All terms in the documents:")
+    def print_all_terms(self):  # Added this function as a method within the class
+        print("\nAll indexed terms:")
         print(list(self.index.keys()))
 
     def boolean_search(self, query):
-        # TYPE YOUR CODE HERE
+        tokens = query.lower().split()
+        result_set = None
+        current_op = None
 
-if __name__ == "__main__":
-    indexer = BooleanRetrieval()
+        for token in tokens:
+            if token in ["and", "or", "not"]:
+                current_op = token
+            else:
+                docs = self.index.get(token, set())
 
-    documents = {
-        1: "Python is a programming language",
-        2: "Information retrieval deals with finding information",
-        3: "Boolean models are used in information retrieval"
-    }
+                if current_op is None:
+                    result_set = docs
+                elif current_op == "and":
+                    result_set = result_set & docs
+                elif current_op == "or":
+                    result_set = result_set | docs
+                elif current_op == "not":
+                    all_docs = set(self.documents.keys())
+                    result_set = result_set & (all_docs - docs)
 
-    for doc_id, text in documents.items():
-        indexer.index_document(doc_id, text)
+                current_op = None
 
-    indexer.create_documents_matrix(documents)
-    indexer.print_documents_matrix_table()
-    indexer.print_all_terms()
+        return result_set if result_set is not None else set()
 
-    query = input("Enter your boolean query: ")
+indexer = BooleanRetrieval()
+
+documents = {
+    1: "Python is a programming language",
+    2: "Information retrieval deals with finding information",
+    3: "Boolean models are used in information retrieval"
+}
+
+for doc_id, text in documents.items():
+    indexer.index_document(doc_id, text)
+
+indexer.create_documents_matrix()
+indexer.print_documents_matrix_table()
+indexer.print_all_terms()
+
+while True:
+    query = input("\nEnter your boolean query (or 'exit' to quit): ")
+    if query.lower() == 'exit':
+        break
     results = indexer.boolean_search(query)
     if results:
-        print(f"Results for '{query}': {results}")
+        print(f"Results for '{query}': Documents {sorted(results)}")
     else:
         print("No results found for the query.")
-
-
+```
 ### Output:
+<img width="1508" height="628" alt="Screenshot 2025-09-29 001452" src="https://github.com/user-attachments/assets/a781086e-d3f2-45a9-90c8-a7db3b336605" />
 
 ### Result:
+Thus , We had implemented the "Information Retrieval Using Boolean Model in Python"
+
